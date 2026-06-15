@@ -11,7 +11,7 @@ SHELL        := /bin/sh
 PYTHON       := uv run python
 RUN          := uv run
 VENV_DIR     := .venv
-PYTHONPATH   ?= .
+PYTHONPATH   ?= src
 export PYTHONPATH
 API_HOST     ?= 127.0.0.1
 API_PORT     ?= 8000
@@ -101,10 +101,10 @@ doctor: check-uv check-venv ## Diagnostique l'environnement de travail
 # ==============================================================================
 
 data: ## Prepare/genere le jeu de donnees dans data/
-	$(PYTHON) prepare_telco.py
+	$(PYTHON) scripts/prepare_telco.py
 
 train: ## Entraine la baseline -> models/model.joblib (C=.. MAX_ITER=..)
-	$(PYTHON) -m mlproject.train
+	$(PYTHON) -m mlproject.train --c $(C) --max-iter $(MAX_ITER)
 
 train-models: ## Compare RF / XGBoost / LightGBM (GridSearchCV) + SHAP (CV=.. SCORING=..)
 	# TODO (S7) : $(PYTHON) -m mlproject.train_models --cv $(CV) --scoring $(SCORING)
