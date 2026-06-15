@@ -1,0 +1,26 @@
+# Seance 8 - TP Docker : completez ce Dockerfile pour conteneuriser l'entrainement.
+# Objectif : une image qui execute `python -m mlproject.train` de facon reproductible.
+# Build  : docker build -f todo/docker/Dockerfile.train -t mlproject-train .
+# Run    : docker run --rm -v "$PWD/models:/app/models" mlproject-train
+#
+# Voir tp/TP_S8_docker.md pour le detail de chaque etape.
+
+# TODO (S8-1) : image de base Python 3.13 slim
+# FROM python:3.13-slim
+
+# TODO (S8-2) : variables d'environnement (PYTHONUNBUFFERED, PYTHONPATH vers votre
+#               package mlproject) et dossier de travail (WORKDIR /app)
+
+# libgomp1 : runtime OpenMP requis par LightGBM
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# TODO (S8-3) : copier pyproject.toml puis installer les dependances (pip install .)
+#               AVANT de copier le code source, pour profiter du cache de layers
+#               quand seul le code change.
+
+# TODO (S8-4) : copier votre package mlproject (et le script de preparation des
+#               donnees) dans l'image
+
+# TODO (S8-5) : preparer/generer vos donnees dans data/ puis definir la commande
+#               par defaut (CMD ["python", "-m", "mlproject.train"])
