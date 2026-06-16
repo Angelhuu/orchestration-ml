@@ -119,7 +119,10 @@ mlflow: ## Demarre le serveur MLflow (docker compose)
 	# TODO (S5) : docker compose -f docker-compose.yml up -d mlflow
 
 api: ## Lance l'API FastAPI en rechargement auto (voir API_HOST/API_PORT)
-	# TODO (S12) : $(RUN) uvicorn mlproject.api:app --reload --host $(API_HOST) --port $(API_PORT)
+	$(RUN) uvicorn mlproject.api:app --reload --host $(API_HOST) --port $(API_PORT)
+
+predict-client: ## Teste l'API avec quelques payloads du dataset
+	$(PYTHON) scripts/predict_client.py
 
 frontend: ## Lance le frontend Streamlit (voir FRONTEND_PORT, API_URL)
 	# TODO (S14bis) : $(RUN) streamlit run frontend/app.py --server.port $(FRONTEND_PORT)

@@ -49,6 +49,8 @@ MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 MLFLOW_EXPERIMENT = os.getenv("MLFLOW_EXPERIMENT", "telco-churn-baseline")
 MODEL_NAME = os.getenv("MODEL_NAME", "telco-churn-classifier")
 
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+
 MLFLOW_EXPERIMENT_DESCRIPTION = os.getenv(
     "MLFLOW_EXPERIMENT_DESCRIPTION",
     "Projet de classification binaire pour predire le churn des clients telecoms.",
