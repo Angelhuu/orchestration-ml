@@ -60,7 +60,6 @@ class FitResult:
     roc_auc: float
     preds: np.ndarray
 
-
 def build_model_specs() -> list[ModelSpec]:
     return [
         ModelSpec(
@@ -68,12 +67,12 @@ def build_model_specs() -> list[ModelSpec]:
             estimator=RandomForestClassifier(
                 random_state=RANDOM_STATE,
                 class_weight="balanced",
-                n_jobs=-1,
+                n_jobs=1,
             ),
             param_grid={
-                "clf__n_estimators": [100, 200],
-                "clf__max_depth": [None, 10, 20],
-                "clf__min_samples_leaf": [1, 2],
+                "clf__n_estimators": [100],
+                "clf__max_depth": [10, None],
+                "clf__min_samples_leaf": [2],
             },
         ),
         ModelSpec(
@@ -81,12 +80,12 @@ def build_model_specs() -> list[ModelSpec]:
             estimator=XGBClassifier(
                 random_state=RANDOM_STATE,
                 eval_metric="logloss",
-                n_jobs=-1,
+                n_jobs=1,
             ),
             param_grid={
-                "clf__n_estimators": [100, 200],
-                "clf__max_depth": [3, 5],
-                "clf__learning_rate": [0.1, 0.01],
+                "clf__n_estimators": [100],
+                "clf__max_depth": [3],
+                "clf__learning_rate": [0.1, 0.05],
             },
         ),
         ModelSpec(
@@ -95,11 +94,12 @@ def build_model_specs() -> list[ModelSpec]:
                 random_state=RANDOM_STATE,
                 class_weight="balanced",
                 verbose=-1,
+                n_jobs=1,
             ),
             param_grid={
-                "clf__n_estimators": [100, 200],
-                "clf__num_leaves": [31, 63],
-                "clf__learning_rate": [0.1, 0.01],
+                "clf__n_estimators": [100],
+                "clf__num_leaves": [31],
+                "clf__learning_rate": [0.1, 0.05],
             },
         ),
     ]
@@ -130,7 +130,7 @@ def optimize_model(
         param_grid=spec.param_grid,
         cv=cv,
         scoring=scoring,
-        n_jobs=-1,
+        n_jobs=1,
         refit=True,
     )
 
