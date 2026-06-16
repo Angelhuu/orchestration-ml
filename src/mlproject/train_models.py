@@ -71,8 +71,8 @@ def build_model_specs() -> list[ModelSpec]:
                 n_jobs=1,
             ),
             param_grid={
-                "clf__n_estimators": [100],
-                "clf__max_depth": [10, None],
+                "clf__n_estimators": [50],
+                "clf__max_depth": [10],
                 "clf__min_samples_leaf": [2],
             },
         ),
@@ -84,9 +84,9 @@ def build_model_specs() -> list[ModelSpec]:
                 n_jobs=1,
             ),
             param_grid={
-                "clf__n_estimators": [100],
+                "clf__n_estimators": [50],
                 "clf__max_depth": [3],
-                "clf__learning_rate": [0.1, 0.05],
+                "clf__learning_rate": [0.1],
             },
         ),
         ModelSpec(
@@ -98,9 +98,9 @@ def build_model_specs() -> list[ModelSpec]:
                 n_jobs=1,
             ),
             param_grid={
-                "clf__n_estimators": [100],
+                "clf__n_estimators": [50],
                 "clf__num_leaves": [31],
-                "clf__learning_rate": [0.1, 0.05],
+                "clf__learning_rate": [0.1],
             },
         ),
     ]

@@ -61,3 +61,6 @@ MLFLOW_EXPERIMENT_TAGS: dict[str, str] = {
     "dataset": "Telco Customer Churn",
     "model_registry_name": MODEL_NAME,
 }
+
+EVAL_ROC_AUC_MIN = float(os.getenv("EVAL_ROC_AUC_MIN", "0.70"))
+EVAL_F1_MIN = float(os.getenv("EVAL_F1_MIN", "0.45"))

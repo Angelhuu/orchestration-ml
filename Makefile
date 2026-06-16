@@ -19,9 +19,9 @@ FRONTEND_PORT ?= 8501
 MLFLOW_PORT  := 5000
 C            ?= 1.0
 MAX_ITER     ?= 1000
-CV           ?= 5
+CV           ?= 2
 SCORING      ?= roc_auc
-N_TRIALS     ?= 30
+N_TRIALS     ?= 2
 
 # Couleurs ANSI
 YELLOW := $(shell printf '\033[33m')
@@ -110,7 +110,10 @@ train-models: ## Compare RF / XGBoost / LightGBM (GridSearchCV) + SHAP (CV=.. SC
 	$(PYTHON) -m mlproject.train_models --cv $(CV) --scoring $(SCORING)
 
 train-optuna: ## Optimise RF / XGBoost / LightGBM avec Optuna (N_TRIALS=.. CV=..)
-	# TODO (S6) : $(PYTHON) -m mlproject.train_optuna --n-trials $(N_TRIALS) --cv $(CV)
+	$(PYTHON) -m mlproject.train_optuna --n-trials $(N_TRIALS) --cv $(CV)
+
+evaluate: ## Evalue le dernier modele du registry
+	$(PYTHON) -m mlproject.evaluate
 
 mlflow: ## Demarre le serveur MLflow (docker compose)
 	# TODO (S5) : docker compose -f docker-compose.yml up -d mlflow
