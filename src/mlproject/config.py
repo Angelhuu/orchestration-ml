@@ -48,3 +48,16 @@ RANDOM_STATE = 42
 MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
 MLFLOW_EXPERIMENT = os.getenv("MLFLOW_EXPERIMENT", "telco-churn-baseline")
 MODEL_NAME = os.getenv("MODEL_NAME", "telco-churn-classifier")
+
+MLFLOW_EXPERIMENT_DESCRIPTION = os.getenv(
+    "MLFLOW_EXPERIMENT_DESCRIPTION",
+    "Projet de classification binaire pour predire le churn des clients telecoms.",
+)
+
+MLFLOW_EXPERIMENT_TAGS: dict[str, str] = {
+    "project": "telco-customer-churn",
+    "task": "binary-classification",
+    "target": TARGET,
+    "dataset": "Telco Customer Churn",
+    "model_registry_name": MODEL_NAME,
+}

@@ -36,6 +36,7 @@ from mlproject.config import (
 from mlproject.data import load_data, split
 from mlproject.evaluation import log_shap_summary
 from mlproject.features import build_preprocessor
+from mlproject.tracking import log_dataset, setup_experiment
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -255,8 +256,7 @@ def train_all(
     x_train, x_test, y_train, y_test = split(df)
 
     if use_mlflow:
-        mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-        mlflow.set_experiment(MLFLOW_EXPERIMENT)
+        setup_experiment()
         logger.info("Suivi MLflow : %s", MLFLOW_TRACKING_URI)
         logger.info("Experience MLflow : %s", MLFLOW_EXPERIMENT)
 
@@ -293,6 +293,21 @@ def train_all(
             mlflow.log_param("cv", cv)
             mlflow.log_param("scoring", scoring)
             mlflow.set_tag("best_model", best.name)
+
+            log_dataset(
+                df=df,
+                context="training",
+                name="telco_churn_dataset",
+            )
+
+            mlflow.log_metric("best_f1", best.f1)
+            mlflow.log_metric("best_roc_auc", best.roc_auc)
+            mlflow.log_metric(f"best_cv_{scoring}", best.cv_score)
+
+            for result in results:
+                mlflow.log_metric(f"{result.name}_f1", result.f1)
+                mlflow.log_metric(f"{result.name}_roc_auc", result.roc_auc)
+                mlflow.log_metric(f"{result.name}_cv_{scoring}", result.cv_score)
 
             for result in results:
                 register_as = MODEL_NAME if result.name == best.name else None
