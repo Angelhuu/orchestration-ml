@@ -1,0 +1,22 @@
+# Image de l'API FastAPI d'inference pour le projet Telco Churn.
+# Build : docker build -f docker/Dockerfile.api -t mlproject-api .
+# Run   : docker run --rm -p 8000:8000 -v "$PWD/models:/app/models:ro" mlproject-api
+
+FROM python:3.13-slim
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app/src
+
+WORKDIR /app
+
+# libgomp1 : runtime OpenMP requis pour LightGBM
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml ./
+COPY src ./src
+
+RUN pip install --no-cache-dir .
+
+EXPOSE 8000
+
+CMD ["uvicorn", "mlproject.api:app", "--host", "0.0.0.0", "--port", "8000"]

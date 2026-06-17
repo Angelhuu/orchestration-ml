@@ -1,0 +1,82 @@
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v3.13.0
+    container_name: mlproject-mlflow
+    command:
+      - mlflow
+      - server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "5000"
+      - --backend-store-uri
+      - sqlite:////mlflow/mlflow.db
+      - --artifacts-destination
+      - /mlflow/artifacts
+      - --serve-artifacts
+      - --allowed-hosts
+      - "*"
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  train:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.train
+    container_name: mlproject-train
+    environment:
+      PYTHONPATH: /app/src
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT: telco-churn-baseline
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+      - models_data:/app/models
+    command: ["sh", "-c", "python scripts/prepare_telco.py && python -m mlproject.train --c 1.0 --max-iter 1000"]
+    profiles:
+      - train
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: mlproject-api
+    ports:
+      - "8000:8000"
+    environment:
+      PYTHONPATH: /app/src
+      CHURN_THRESHOLD: "0.5"
+      MODEL_VERSION: docker-local
+    volumes:
+      - models_data:/app/models:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: mlproject-frontend
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  mlflow_data:
+  models_data:
