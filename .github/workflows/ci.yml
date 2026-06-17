@@ -5,13 +5,22 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  checks:
+  quality:
+    name: Quality checks
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -25,9 +34,12 @@ jobs:
           sudo apt-get install -y libgomp1
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
 
-      - name: Sync dependencies
+      - name: Install dependencies
         run: uv sync --extra dev
 
       - name: Makefile help
@@ -36,3 +48,74 @@ jobs:
       - name: Python compile check
         run: |
           PYTHONPATH=src uv run python -m compileall src scripts
+
+      - name: Lint with ruff
+        run: |
+          PYTHONPATH=src uv run ruff check src/mlproject scripts
+
+      - name: Type check with mypy
+        run: |
+          PYTHONPATH=src uv run mypy src/mlproject
+
+      - name: Tests with pytest
+        run: |
+          PYTHONPATH=src uv run pytest
+
+  train:
+    name: Baseline training
+    runs-on: ubuntu-latest
+    needs: quality
+
+    env:
+      PYTHONPATH: src
+      MLFLOW_TRACKING_URI: sqlite:///mlflow.db
+      MLFLOW_EXPERIMENT: telco-churn-baseline
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Prepare data
+        run: |
+          if [ -f data/telco_churn_raw.csv ]; then
+            uv run python scripts/prepare_telco.py
+          elif [ -f data/telco_churn_clean.csv ]; then
+            echo "Clean dataset already exists."
+          else
+            echo "Missing dataset: data/telco_churn_raw.csv or data/telco_churn_clean.csv"
+            exit 1
+          fi
+
+      - name: Train baseline model
+        run: |
+          uv run python -m mlproject.train --c 1.0 --max-iter 1000
+
+      - name: Check trained model exists
+        run: |
+          test -f models/model.joblib
+          ls -lah models/model.joblib
+
+      - name: Upload trained model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: model
+          path: models/model.joblib
