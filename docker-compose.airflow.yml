@@ -1,0 +1,82 @@
+services:
+  airflow-init:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.airflow
+    container_name: mlproject-airflow-init
+    environment:
+      PYTHONPATH: /opt/airflow/src
+      API_URL: http://api:8000
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT: telco-churn-baseline
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/db/airflow.db
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./scripts:/opt/airflow/scripts
+      - ./data:/opt/airflow/data
+      - ./airflow/db:/opt/airflow/db
+      - ./airflow/logs:/opt/airflow/logs
+      - models_data:/opt/airflow/models
+    command: >
+      bash -c "airflow db migrate &&
+               airflow users create
+               --username admin
+               --password admin
+               --firstname HU
+               --lastname Angel
+               --role Admin
+               --email admin@example.com || true"
+
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.airflow
+    container_name: mlproject-airflow-webserver
+    environment:
+      PYTHONPATH: /opt/airflow/src
+      API_URL: http://api:8000
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT: telco-churn-baseline
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/db/airflow.db
+      AIRFLOW__WEBSERVER__WEB_SERVER_HOST: 0.0.0.0
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./scripts:/opt/airflow/scripts
+      - ./data:/opt/airflow/data
+      - ./airflow/db:/opt/airflow/db
+      - ./airflow/logs:/opt/airflow/logs
+      - models_data:/opt/airflow/models
+    command: >
+      bash -c "airflow webserver --host 0.0.0.0 --port 8080"
+
+  airflow-scheduler:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.airflow
+    container_name: mlproject-airflow-scheduler
+    environment:
+      PYTHONPATH: /opt/airflow/src
+      API_URL: http://api:8000
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT: telco-churn-baseline
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/db/airflow.db
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./scripts:/opt/airflow/scripts
+      - ./data:/opt/airflow/data
+      - ./airflow/db:/opt/airflow/db
+      - ./airflow/logs:/opt/airflow/logs
+      - models_data:/opt/airflow/models
+    command: >
+      bash -c "airflow scheduler"

@@ -71,8 +71,13 @@ services:
     container_name: mlproject-frontend
     environment:
       API_URL: http://api:8000
+      PUBLIC_API_URL: ${PUBLIC_API_URL}
+      PUBLIC_MLFLOW_URL: ${PUBLIC_MLFLOW_URL}
+      PUBLIC_AIRFLOW_URL: ${PUBLIC_AIRFLOW_URL}
     ports:
       - "8501:8501"
+    volumes:
+      - ./data:/app/data:ro
     depends_on:
       api:
         condition: service_healthy

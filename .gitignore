@@ -68,3 +68,23 @@ standalone_admin_password.txt
 Thumbs.db
 .idea/
 *.swp
+
+# Local environment
+.env
+
+# Airflow local runtime
+airflow/db/
+airflow/logs/
+airflow/*.db
+
+# MLflow local runtime
+mlruns/
+mlflow.db
+
+# Models generated locally
+models/
+*.joblib
+
+# Python cache
+__pycache__/
+*.pyc
